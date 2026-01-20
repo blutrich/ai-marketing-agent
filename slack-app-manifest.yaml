@@ -1,0 +1,38 @@
+display_information:
+  name: Marketing Bot
+  description: AI Marketing Assistant - generates content, ideas, and strategies
+  background_color: "#4A154B"
+
+features:
+  bot_user:
+    display_name: Marketing Bot
+    always_online: true
+  slash_commands:
+    - command: /marketing
+      description: Ask the marketing agent for help
+      usage_hint: "[your request]"
+      should_escape: false
+    - command: /clear
+      description: Clear conversation history
+      should_escape: false
+
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - im:history
+      - im:read
+      - im:write
+      - commands
+
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_mention
+      - message.im
+  interactivity:
+    is_enabled: false
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false
