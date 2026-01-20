@@ -130,6 +130,7 @@ def build_prompt(request: ContentRequest) -> str:
         "seo": "Use the seo-content skill to optimize this content for search engines.",
         "geo": "Use the geo-content skill to optimize this content for AI citation and LLM discovery.",
         "direct-response": "Use the direct-response-copy skill with THE SLIDE framework.",
+        "landing-page": "Use the landing-page-architecture skill with the 8-Section Framework: HERO, SUCCESS, PROBLEM-AGITATE, VALUE STACK, SOCIAL PROOF, TRANSFORMATION, SECONDARY CTA, FOOTER. Each section has ONE job.",
         "general": "Apply the brand-voice skill to ensure consistent tone and messaging.",
     }
 
