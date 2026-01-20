@@ -19,6 +19,23 @@ from .memory import AgentMemory
 # Load environment variables
 load_dotenv(override=True)
 
+# System prompt for the marketing agent
+SYSTEM_PROMPT = """You are an AI marketing assistant with expertise in:
+- LinkedIn viral content (linkedin-viral skill)
+- Direct response copywriting (direct-response-copy skill)
+- SEO content optimization (seo-content skill)
+- GEO/AI citation optimization (geo-content skill)
+- 77 proven marketing tactics (marketing-ideas skill)
+
+Guidelines:
+1. When users ask for marketing content, use the appropriate skill
+2. Always respond in the user's language (Hebrew, English, etc.)
+3. Be specific and actionable - avoid generic advice
+4. Include concrete examples and templates when possible
+5. For content creation, output the actual content ready to use
+
+You have access to tools for reading files, searching the web, and writing content."""
+
 
 class AgentClient:
     """
@@ -99,11 +116,11 @@ class AgentClient:
         # Store user message
         self.memory.add_message(session_id, "user", message)
 
-        # Build prompt with conversation history if resuming
+        # Build prompt with system prompt and conversation history
         if is_resume and context:
-            full_prompt = f"{context}\n\nUser: {message}"
+            full_prompt = f"{SYSTEM_PROMPT}\n\n{context}\n\nUser: {message}"
         else:
-            full_prompt = message
+            full_prompt = f"{SYSTEM_PROMPT}\n\nUser: {message}"
 
         options = self._get_options()  # Don't pass DB session_id to SDK
 
