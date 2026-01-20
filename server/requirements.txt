@@ -12,5 +12,8 @@ httpx>=0.26.0
 # Database
 supabase>=2.0.0
 
+# Slack Bot
+slack-bolt>=1.18.0
+
 # Utilities
 python-dotenv>=1.0.0
