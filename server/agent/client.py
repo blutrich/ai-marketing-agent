@@ -72,7 +72,7 @@ class AgentClient:
             permission_mode="bypassPermissions",
             max_turns=self.max_turns,
             max_budget_usd=self.max_budget_usd,
-            allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "WebFetch"],
+            allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "WebFetch", "WebSearch"],
         )
 
         # Only resume if we have a valid Claude SDK session ID
