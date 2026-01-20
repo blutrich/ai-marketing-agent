@@ -82,6 +82,8 @@ class AgentClient:
             Dict with response chunks and metadata
         """
         # Create or resume session
+        is_resume = False
+        context = ""
         if not session_id:
             session_id = self.memory.create_session(metadata={"type": "chat"})
         else:
@@ -89,6 +91,19 @@ class AgentClient:
             existing = self.memory.get_session(session_id)
             if not existing:
                 session_id = self.memory.create_session(metadata={"type": "chat"})
+            else:
+                is_resume = True
+                # Get conversation history BEFORE adding new message
+                context = self.memory.get_conversation_context(session_id, limit=10)
+
+        # Store user message
+        self.memory.add_message(session_id, "user", message)
+
+        # Build prompt with conversation history if resuming
+        if is_resume and context:
+            full_prompt = f"{context}\n\nUser: {message}"
+        else:
+            full_prompt = message
 
         options = self._get_options()  # Don't pass DB session_id to SDK
 
@@ -98,8 +113,8 @@ class AgentClient:
 
         try:
             async with ClaudeSDKClient(options=options) as client:
-                # Send the query
-                await client.query(message)
+                # Send the query with context
+                await client.query(full_prompt)
 
                 # Receive and process response
                 async for msg in client.receive_response():
@@ -125,9 +140,12 @@ class AgentClient:
                             "duration_ms": duration_ms
                         }
 
-            # Update session summary (first 200 chars of response)
+            # Store assistant response and update session summary
             full_content = "".join(content_parts)
             if full_content:
+                # Store the assistant message
+                self.memory.add_message(session_id, "assistant", full_content)
+                # Update session summary (first 200 chars)
                 summary = full_content[:200] + "..." if len(full_content) > 200 else full_content
                 self.memory.update_session(session_id, summary=summary)
 

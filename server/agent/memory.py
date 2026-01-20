@@ -80,6 +80,58 @@ class AgentMemory:
             logger.error(f"Failed to list sessions: {e}")
             raise RuntimeError(f"Database error: {e}")
 
+    # ==================== Messages ====================
+
+    def add_message(
+        self,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: Optional[dict] = None
+    ) -> str:
+        """Add a message to conversation history."""
+        message_id = str(uuid.uuid4())
+
+        try:
+            self.client.table("messages").insert({
+                "id": message_id,
+                "session_id": session_id,
+                "role": role,
+                "content": content,
+                "metadata": metadata or {}
+            }).execute()
+        except Exception as e:
+            logger.error(f"Failed to add message: {e}")
+            raise RuntimeError(f"Database error: {e}")
+
+        return message_id
+
+    def get_messages(self, session_id: str, limit: int = 50) -> list:
+        """Get conversation history for a session."""
+        try:
+            result = self.client.table("messages").select("*").eq(
+                "session_id", session_id
+            ).order("created_at", desc=False).limit(limit).execute()
+            return result.data
+        except Exception as e:
+            logger.error(f"Failed to get messages for {session_id}: {e}")
+            raise RuntimeError(f"Database error: {e}")
+
+    def get_conversation_context(self, session_id: str, limit: int = 20) -> str:
+        """Get formatted conversation history as context string."""
+        messages = self.get_messages(session_id, limit)
+        if not messages:
+            return ""
+
+        context_parts = ["Previous conversation:"]
+        for msg in messages:
+            role = "User" if msg["role"] == "user" else "Assistant"
+            # Truncate long messages for context
+            content = msg["content"][:500] + "..." if len(msg["content"]) > 500 else msg["content"]
+            context_parts.append(f"{role}: {content}")
+
+        return "\n\n".join(context_parts)
+
     # ==================== Content Log ====================
 
     def log_content(
