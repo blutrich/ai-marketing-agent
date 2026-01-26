@@ -18,6 +18,9 @@ RUN npm install -g @anthropic-ai/claude-code
 # Set working directory
 WORKDIR /app
 
+# Copy brand data for skills that reference /app/brands/
+COPY brands/ /app/brands/
+
 # Copy skills directory from project root
 # This is CRITICAL - skills must be at /app/.claude/skills/
 COPY .claude/skills/ /app/.claude/skills/

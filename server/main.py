@@ -125,6 +125,7 @@ app.add_middleware(
 def build_prompt(request: ContentRequest) -> str:
     """Build the full prompt with content type hints for skill activation."""
     content_type_hints = {
+        # Original skills
         "linkedin": "Use the linkedin-viral skill to format this content for LinkedIn with hooks and engagement patterns.",
         "email": "Use the direct-response-copy skill with THE SLIDE framework for this email content.",
         "seo": "Use the seo-content skill to optimize this content for search engines.",
@@ -132,6 +133,16 @@ def build_prompt(request: ContentRequest) -> str:
         "direct-response": "Use the direct-response-copy skill with THE SLIDE framework.",
         "landing-page": "Use the landing-page-architecture skill with the 8-Section Framework: HERO, SUCCESS, PROBLEM-AGITATE, VALUE STACK, SOCIAL PROOF, TRANSFORMATION, SECONDARY CTA, FOOTER. Each section has ONE job.",
         "general": "Apply the brand-voice skill to ensure consistent tone and messaging.",
+        # New skills from marketing-skills suite
+        "linkedin-post": "Use the linkedin-post skill for authentic LinkedIn content with anti-template philosophy.",
+        "x-post": "Use the x-post skill for Twitter/X content.",
+        "video": "Use the base44-video skill for Remotion video generation.",
+        "diagram": "Use the excalidraw-diagram skill for visual diagrams.",
+        "slides": "Use the pptx-generator skill for presentations.",
+        "image": "Use the nano-banana skill for AI image generation with Gemini.",
+        "brand-setup": "Use the brand-voice-generator skill to create brand systems.",
+        "sop": "Use the sop-creator skill for runbooks and documentation.",
+        "skill": "Use the skill-creator skill to create new Claude Code skills.",
     }
 
     hint = content_type_hints.get(request.content_type, content_type_hints["general"])

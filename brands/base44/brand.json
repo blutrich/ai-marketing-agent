@@ -1,0 +1,55 @@
+{
+  "name": "Base44",
+  "description": "AI-first vibe coding platform - light gradient aesthetic with warm orange accents",
+
+  "colors": {
+    "background": "E8F4F8",
+    "background_alt": "FDF5F0",
+    "background_secondary": "F0F0F0",
+    "text": "000000",
+    "text_secondary": "666666",
+    "accent": "FF983B",
+    "accent_light": "FFE9DF",
+    "accent_medium": "FFBFA1",
+    "accent_dark": "EA6020",
+    "accent_darkest": "C94001",
+    "code_bg": "f5f5f5",
+    "card_bg": "FFFFFF",
+    "card_bg_alt": "f9f9f9",
+    "button_bg": "000000",
+    "button_text": "FFFFFF"
+  },
+
+  "gradients": {
+    "primary": {
+      "type": "linear",
+      "direction": "180deg",
+      "stops": ["E8F4F8", "FDF5F0"]
+    }
+  },
+
+  "fonts": {
+    "heading": "BC Novatica Cyr",
+    "heading_alt": "STK Miso",
+    "heading_fallback": "Arial",
+    "body": "Inter",
+    "body_fallback": "Arial",
+    "code": "Courier New"
+  },
+
+  "assets": {
+    "logo": "assets/logo.png",
+    "logo_dark": null,
+    "icon": null
+  },
+
+  "shadows": {
+    "card": "0 4px 24px rgba(0,0,0,0.08)",
+    "elevated": "0 8px 32px rgba(0,0,0,0.12)"
+  },
+
+  "carousel": {
+    "logo_placement": "cta_slide_only",
+    "text_formatting": "paragraph_direct"
+  }
+}
