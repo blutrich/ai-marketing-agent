@@ -1,6 +1,0 @@
-# Railway Configuration for multi-service project
-# Each service uses its specific Dockerfile
-
-[build]
-# Default: API service uses server/Dockerfile
-dockerfilePath = "server/Dockerfile"
