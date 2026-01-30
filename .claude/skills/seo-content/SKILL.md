@@ -1,3 +1,8 @@
+---
+name: seo-content
+description: Creates search-optimized content that ranks on Google. Use when writing blog posts, pillar pages, how-to guides, product comparisons, FAQ pages, or any content targeting organic search traffic.
+---
+
 # SEO Content Skill
 
 > Rank on Google search through strategic, search-optimized content.

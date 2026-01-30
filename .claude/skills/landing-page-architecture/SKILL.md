@@ -1,3 +1,8 @@
+---
+name: landing-page-architecture
+description: Builds high-converting landing pages using the 8-Section Framework. Use when creating landing pages, lead magnet pages, product launches, sales pages, webinar registrations, service pages, or pricing pages.
+---
+
 # Landing Page Architecture Skill
 
 > Build high-converting landing pages using the 8-Section Framework.

@@ -1,3 +1,8 @@
+---
+name: linkedin-viral
+description: Optimizes content for LinkedIn algorithm and engagement patterns. Use when creating LinkedIn posts, carousels, articles, or newsletters that need maximum reach and engagement.
+---
+
 # LinkedIn Viral Skill
 
 > Optimize content for LinkedIn algorithm and engagement patterns.

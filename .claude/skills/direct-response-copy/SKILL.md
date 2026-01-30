@@ -1,3 +1,8 @@
+---
+name: direct-response-copy
+description: Writes conversion-focused copy using THE SLIDE framework and SO WHAT chain. Use when creating landing pages, sales emails, ad copy, product descriptions, lead magnets, webinar pages, or any content that needs to drive measurable action.
+---
+
 # Direct Response Copy Skill
 
 > Write copy that converts using THE SLIDE framework and SO WHAT chain.

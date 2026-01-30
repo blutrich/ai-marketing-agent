@@ -1,3 +1,8 @@
+---
+name: geo-content
+description: Creates content optimized for AI citation (GEO - Generative Engine Optimization). Use when writing content that should be cited by ChatGPT, Perplexity, Claude, or Google AI Overviews - including definition pages, research reports, expert opinions, and methodology documentation.
+---
+
 # GEO Content Skill (Generative Engine Optimization)
 
 > Get cited by AI systems (ChatGPT, Perplexity, Claude, Google AI Overviews).

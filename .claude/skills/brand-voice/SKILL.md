@@ -1,3 +1,8 @@
+---
+name: brand-voice
+description: Applies Base44/Ofer Blutrich voice and tone to marketing content. Use when writing LinkedIn posts, emails, blog articles, sales copy, landing pages, or any marketing content that needs consistent brand voice.
+---
+
 # Brand Voice Skill
 
 > Ensure all content sounds like Base44/Ofer Blutrich - the trusted AI consultant who makes complex things simple.
