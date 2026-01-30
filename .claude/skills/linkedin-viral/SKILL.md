@@ -340,6 +340,27 @@ Strong: 3-5% weekly growth
 
 ---
 
+## Brand Data Loading (Base44)
+
+Before writing LinkedIn content, load brand context:
+
+**Required reads:**
+- `Read: brands/base44/tone-of-voice.md` - Voice guidelines and vocabulary
+- `Read: brands/base44/facts/metrics.md` - Current stats ($80M acquisition, 140K builders)
+
+**For success stories:**
+- `Read: brands/base44/case-studies/index.md` - Quick reference of all cases
+- `Read: brands/base44/case-studies/giftmybook.md` - Full GiftMyBook story
+
+**For credibility:**
+- `Read: brands/base44/feedback/testimonials.md` - Quotable builder quotes
+
+**For hooks and CTAs:**
+- `Read: brands/base44/content-library/hooks.md` - Proven openers
+- `Read: brands/base44/content-library/ctas.md` - Call-to-action templates
+
+---
+
 ## Integration
 
 **Depends on:** brand-voice (apply voice), direct-response-copy (for CTAs)

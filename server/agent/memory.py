@@ -49,9 +49,10 @@ class AgentMemory:
         session_id: str,
         summary: Optional[str] = None,
         tags: Optional[list] = None,
-        metadata: Optional[dict] = None
+        metadata: Optional[dict] = None,
+        claude_session_id: Optional[str] = None
     ) -> None:
-        """Update session with summary, tags, or metadata."""
+        """Update session with summary, tags, metadata, or Claude SDK session ID."""
         update_data = {}
         if summary is not None:
             update_data["summary"] = summary
@@ -59,6 +60,8 @@ class AgentMemory:
             update_data["tags"] = tags
         if metadata is not None:
             update_data["metadata"] = metadata
+        if claude_session_id is not None:
+            update_data["claude_session_id"] = claude_session_id
 
         if update_data:
             try:
@@ -68,6 +71,19 @@ class AgentMemory:
             except Exception as e:
                 logger.error(f"Failed to update session {session_id}: {e}")
                 raise RuntimeError(f"Database error: {e}")
+
+    def get_claude_session_id(self, session_id: str) -> Optional[str]:
+        """Get the Claude SDK session ID for resuming conversations."""
+        try:
+            result = self.client.table("sessions").select("claude_session_id").eq(
+                "session_id", session_id
+            ).execute()
+            if result.data and result.data[0].get("claude_session_id"):
+                return result.data[0]["claude_session_id"]
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get Claude session ID for {session_id}: {e}")
+            return None
 
     def list_sessions(self, limit: int = 20) -> list:
         """List recent sessions."""

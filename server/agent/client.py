@@ -20,19 +20,34 @@ from .memory import AgentMemory
 load_dotenv(override=True)
 
 # System prompt for the marketing agent
-SYSTEM_PROMPT = """You are an AI marketing assistant with expertise in:
-- LinkedIn viral content (linkedin-viral skill)
-- Direct response copywriting (direct-response-copy skill)
-- SEO content optimization (seo-content skill)
-- GEO/AI citation optimization (geo-content skill)
-- 77 proven marketing tactics (marketing-ideas skill)
+SYSTEM_PROMPT = """You are an AI marketing assistant for Base44.
 
-Guidelines:
-1. When users ask for marketing content, use the appropriate skill
-2. Always respond in the user's language (Hebrew, English, etc.)
-3. Be specific and actionable - avoid generic advice
-4. Include concrete examples and templates when possible
-5. For content creation, output the actual content ready to use
+## AVAILABLE SKILLS
+
+CONTENT: linkedin-viral, linkedin-post, x-post, direct-response-copy, seo-content, geo-content, landing-page-architecture
+CREATIVE: base44-video, pptx-generator, excalidraw-diagram, nano-banana
+STRATEGY: marketing-ideas, brand-voice
+GENERATORS: brand-voice-generator, sop-creator, skill-creator
+
+## BRAND CONTEXT (READ BEFORE GENERATING CONTENT)
+
+Before creating any marketing content, read the brand files:
+- `brands/base44/tone-of-voice.md` - Voice guidelines, vocabulary, writing rules
+- `brands/base44/brand.json` - Colors, fonts, visual identity
+- `brands/base44/brand-system.md` - Design philosophy
+
+For specific content, also read:
+- `brands/base44/facts/metrics.md` - Current stats and numbers
+- `brands/base44/case-studies/` - Builder success stories
+- `brands/base44/feedback/testimonials.md` - Quotable quotes
+
+## GUIDELINES
+
+1. READ brand files before generating content - don't assume
+2. Match requests to the appropriate skill
+3. Respond in the user's language (Hebrew, English, etc.)
+4. Output ready-to-use content, not explanations
+5. Be specific with numbers, names, and results
 
 You have access to tools for reading files, searching the web, and writing content."""
 
@@ -72,14 +87,12 @@ class AgentClient:
             permission_mode="bypassPermissions",
             max_turns=self.max_turns,
             max_budget_usd=self.max_budget_usd,
-            allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "WebFetch", "WebSearch"],
+            allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "WebFetch", "WebSearch", "Skill"],
         )
 
-        # Only resume if we have a valid Claude SDK session ID
-        # NOTE: For MVP, we create new SDK sessions each time
-        # TODO: Store and retrieve Claude session IDs for true resume
-        # if claude_session_id and claude_session_id.startswith("claude-"):
-        #     options.resume = claude_session_id
+        # Resume from previous SDK session if available
+        if claude_session_id:
+            options.resume = claude_session_id
 
         return options
 
@@ -100,7 +113,8 @@ class AgentClient:
         """
         # Create or resume session
         is_resume = False
-        context = ""
+        claude_session_id = None
+
         if not session_id:
             session_id = self.memory.create_session(metadata={"type": "chat"})
         else:
@@ -110,23 +124,28 @@ class AgentClient:
                 session_id = self.memory.create_session(metadata={"type": "chat"})
             else:
                 is_resume = True
-                # Get conversation history BEFORE adding new message
-                context = self.memory.get_conversation_context(session_id, limit=10)
+                # Get Claude SDK session ID for true resume
+                claude_session_id = self.memory.get_claude_session_id(session_id)
 
         # Store user message
         self.memory.add_message(session_id, "user", message)
 
-        # Build prompt with system prompt and conversation history
-        if is_resume and context:
-            full_prompt = f"{SYSTEM_PROMPT}\n\n{context}\n\nUser: {message}"
+        # Build prompt - if resuming with SDK session, we don't need to include history
+        # The SDK maintains its own conversation state
+        if is_resume and claude_session_id:
+            # True SDK resume - just send the new message
+            full_prompt = message
         else:
+            # New session or no SDK session - include system prompt
             full_prompt = f"{SYSTEM_PROMPT}\n\nUser: {message}"
 
-        options = self._get_options()  # Don't pass DB session_id to SDK
+        # Pass Claude session ID for resume if available
+        options = self._get_options(claude_session_id=claude_session_id)
 
         content_parts = []
         total_cost = 0.0
         duration_ms = 0
+        new_claude_session_id = None
 
         try:
             async with ClaudeSDKClient(options=options) as client:
@@ -148,6 +167,8 @@ class AgentClient:
                     elif isinstance(msg, ResultMessage):
                         total_cost = msg.total_cost_usd or 0
                         duration_ms = msg.duration_ms or 0
+                        # Capture Claude SDK session ID for future resume
+                        new_claude_session_id = getattr(msg, 'session_id', None)
 
                         yield {
                             "type": "result",
@@ -157,14 +178,18 @@ class AgentClient:
                             "duration_ms": duration_ms
                         }
 
-            # Store assistant response and update session summary
+            # Store assistant response and update session
             full_content = "".join(content_parts)
             if full_content:
                 # Store the assistant message
                 self.memory.add_message(session_id, "assistant", full_content)
-                # Update session summary (first 200 chars)
+                # Update session summary and Claude session ID for resume
                 summary = full_content[:200] + "..." if len(full_content) > 200 else full_content
-                self.memory.update_session(session_id, summary=summary)
+                self.memory.update_session(
+                    session_id,
+                    summary=summary,
+                    claude_session_id=new_claude_session_id
+                )
 
         except ClaudeSDKError as e:
             yield {

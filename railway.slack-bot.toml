@@ -1,5 +1,5 @@
 [build]
-dockerfilePath = "Dockerfile"
+dockerfilePath = "server/Dockerfile.slack"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"

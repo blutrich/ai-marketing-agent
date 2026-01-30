@@ -418,6 +418,27 @@ Privacy | Terms
 
 ---
 
+## Brand Data Loading (Base44)
+
+Before creating landing page content, load brand context:
+
+**Required reads:**
+- `Read: brands/base44/tone-of-voice.md` - Voice guidelines and vocabulary
+- `Read: brands/base44/brand.json` - Colors, fonts, visual identity
+- `Read: brands/base44/brand-system.md` - Design philosophy and positioning
+
+**For social proof sections:**
+- `Read: brands/base44/facts/metrics.md` - Stats ($80M acquisition, 140K builders, 10M apps)
+- `Read: brands/base44/case-studies/index.md` - Success stories for transformation section
+- `Read: brands/base44/feedback/testimonials.md` - Quotable builder quotes
+
+**For value stack and CTAs:**
+- `Read: brands/base44/content-library/value-props.md` - Key differentiators
+- `Read: brands/base44/content-library/hooks.md` - Proven attention openers
+- `Read: brands/base44/content-library/ctas.md` - Call-to-action templates
+
+---
+
 ## Integration
 
 **Depends on:** brand-voice (tone), direct-response-copy (THE SLIDE)

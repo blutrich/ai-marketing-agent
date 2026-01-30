@@ -309,6 +309,24 @@ For step-by-step guides - enables rich results in search.
 
 ---
 
+## Brand Data Loading (Base44)
+
+Before writing SEO content, load brand context:
+
+**Required reads:**
+- `Read: brands/base44/tone-of-voice.md` - Voice guidelines and vocabulary
+- `Read: brands/base44/brand-system.md` - Brand positioning and messaging
+
+**For E-E-A-T signals:**
+- `Read: brands/base44/facts/metrics.md` - Credibility stats ($80M acquisition, 140K builders)
+- `Read: brands/base44/case-studies/index.md` - Real-world examples for authority
+- `Read: brands/base44/feedback/testimonials.md` - Social proof quotes
+
+**For content depth:**
+- `Read: brands/base44/content-library/value-props.md` - Key differentiators
+
+---
+
 ## Integration
 
 **Depends on:** brand-voice (apply voice last)

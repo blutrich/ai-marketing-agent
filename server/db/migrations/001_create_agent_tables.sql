@@ -78,3 +78,35 @@ CREATE TRIGGER update_preferences_updated_at
     BEFORE UPDATE ON preferences
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- Messages table: Store conversation history
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id TEXT REFERENCES sessions(session_id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+  content TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
+
+-- Slack users table: Map Slack users to agent sessions
+CREATE TABLE IF NOT EXISTS slack_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slack_user_id TEXT UNIQUE NOT NULL,
+  session_id TEXT,
+  slack_username TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_slack_users_slack_user_id ON slack_users(slack_user_id);
+
+-- Apply trigger to slack_users
+DROP TRIGGER IF EXISTS update_slack_users_updated_at ON slack_users;
+CREATE TRIGGER update_slack_users_updated_at
+    BEFORE UPDATE ON slack_users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();

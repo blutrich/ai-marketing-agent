@@ -341,6 +341,24 @@ Before publishing:
 
 ---
 
+## Brand Data Loading (Base44)
+
+Before writing GEO content, load brand context:
+
+**Required reads:**
+- `Read: brands/base44/tone-of-voice.md` - Voice guidelines and vocabulary
+- `Read: brands/base44/brand-system.md` - Brand positioning for consistent messaging
+
+**For authority signals (critical for AI citation):**
+- `Read: brands/base44/facts/metrics.md` - Verifiable stats ($80M acquisition, 140K builders)
+- `Read: brands/base44/case-studies/index.md` - Concrete examples with specifics
+- `Read: brands/base44/feedback/testimonials.md` - Named sources for credibility
+
+**For semantic richness:**
+- `Read: brands/base44/content-library/value-props.md` - Key differentiators and terminology
+
+---
+
 ## Integration
 
 **Complements:** seo-content (for Google ranking)

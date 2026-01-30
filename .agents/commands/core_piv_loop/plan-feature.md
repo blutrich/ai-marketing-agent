@@ -336,6 +336,39 @@ Execute every command to ensure zero regressions and 100% feature correctness.
 
 <MCP servers or additional CLI tools if available>
 
+### Level 6: Skill Integration (if adding new skill)
+
+If this feature adds a new skill, verify end-to-end integration:
+
+```bash
+# 1. Verify skill directories exist
+ls -la .claude/skills/[skill-name]/
+ls -la .agents/skills/[skill-name]/
+
+# 2. Verify content_type added to server routing
+grep "[content-type]" server/main.py
+
+# 3. Test local server
+cd server && source venv/bin/activate
+SKILLS_DIR=$(pwd)/.. uvicorn server.main:app --port 8000 &
+sleep 3
+curl http://localhost:8000/health | jq '.skills_loaded'
+curl -X POST http://localhost:8000/generate-content \
+  -H "Content-Type: application/json" \
+  -d '{"content_type": "[type]", "prompt": "test"}'
+
+# 4. Test production (after deploy)
+curl -X POST $PRODUCTION_URL/generate-content \
+  -H "Content-Type: application/json" \
+  -d '{"content_type": "[type]", "prompt": "test"}'
+```
+
+**CRITICAL:** A skill is NOT fully integrated until:
+- [ ] Skill files exist in both `.claude/skills/` AND `.agents/skills/`
+- [ ] Content type is routed in `server/main.py:build_prompt()`
+- [ ] `/health` shows skill in `skills_loaded`
+- [ ] `/generate-content` produces skill-specific output
+
 ---
 
 ## ACCEPTANCE CRITERIA
