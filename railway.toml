@@ -1,7 +1,0 @@
-# Per-service build configuration
-
-[services.ai-marketing-agent.build]
-dockerfilePath = "server/Dockerfile"
-
-[services.slack-bot.build]
-dockerfilePath = "server/Dockerfile.slack"
