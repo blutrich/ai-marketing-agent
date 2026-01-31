@@ -92,6 +92,8 @@ def clear_user_session(slack_user_id: str):
 
 def truncate_for_slack(text: str, max_length: int = 3900) -> str:
     """Truncate text to fit Slack's 4000 character limit."""
+    if not text or not text.strip():
+        return "I processed your request but didn't generate a text response."
     if len(text) <= max_length:
         return text
     return text[:max_length] + "\n\n_(Response truncated due to length)_"
@@ -113,11 +115,13 @@ def call_agent(user_id: str, message: str, username: str = None) -> str:
         response.raise_for_status()
         data = response.json()
 
+        logger.info(f"API response keys: {data.keys()}, content length: {len(data.get('content', ''))}")
+
         # Save session for continuity
         if "session_id" in data:
             save_user_session(user_id, data["session_id"], username)
 
-        content = data.get("content", "Sorry, I couldn't generate a response.")
+        content = data.get("content") or "Sorry, I couldn't generate a response."
         return truncate_for_slack(content)
 
 
