@@ -130,17 +130,13 @@ class AgentClient:
         # Store user message
         self.memory.add_message(session_id, "user", message)
 
-        # Build prompt - if resuming with SDK session, we don't need to include history
-        # The SDK maintains its own conversation state
-        if is_resume and claude_session_id:
-            # True SDK resume - just send the new message
-            full_prompt = message
-        else:
-            # New session or no SDK session - include system prompt
-            full_prompt = f"{SYSTEM_PROMPT}\n\nUser: {message}"
+        # Always include system prompt for now
+        # TODO: Re-enable SDK session resume once we debug why it returns empty content
+        # The resume feature was causing empty responses when claude_session_id was set
+        full_prompt = f"{SYSTEM_PROMPT}\n\nUser: {message}"
 
-        # Pass Claude session ID for resume if available
-        options = self._get_options(claude_session_id=claude_session_id)
+        # Don't pass claude_session_id for now - it causes empty responses
+        options = self._get_options(claude_session_id=None)
 
         content_parts = []
         total_cost = 0.0
