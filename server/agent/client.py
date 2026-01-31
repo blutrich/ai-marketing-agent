@@ -10,6 +10,7 @@ from claude_agent_sdk import (
     ClaudeAgentOptions,
     AssistantMessage,
     TextBlock,
+    ToolUseBlock,
     ResultMessage,
     ClaudeSDKError,
 )
@@ -74,12 +75,13 @@ class AgentClient:
         self.max_budget_usd = max_budget_usd
         self.memory = AgentMemory()
 
-    def _get_options(self, claude_session_id: Optional[str] = None) -> ClaudeAgentOptions:
+    def _get_options(self, claude_session_id: Optional[str] = None, is_resume: bool = False) -> ClaudeAgentOptions:
         """Build ClaudeAgentOptions with skills and settings.
 
         Args:
             claude_session_id: Optional CLAUDE session ID (from SDK) to resume.
                               NOT our database session ID.
+            is_resume: Whether this is resuming an existing conversation.
         """
         options = ClaudeAgentOptions(
             cwd=self.skills_dir,
@@ -88,11 +90,15 @@ class AgentClient:
             max_turns=self.max_turns,
             max_budget_usd=self.max_budget_usd,
             allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "WebFetch", "WebSearch", "Skill"],
+            # Use system_prompt option instead of prepending to every message
+            system_prompt=SYSTEM_PROMPT,
         )
 
-        # Resume from previous SDK session if available
-        if claude_session_id:
+        # Resume from previous SDK session if available and valid
+        if claude_session_id and is_resume:
             options.resume = claude_session_id
+            # When resuming, context is preserved so we don't need system prompt again
+            # But we keep it for safety in case session expired
 
         return options
 
@@ -130,23 +136,23 @@ class AgentClient:
         # Store user message
         self.memory.add_message(session_id, "user", message)
 
-        # Always include system prompt for now
-        # TODO: Re-enable SDK session resume once we debug why it returns empty content
-        # The resume feature was causing empty responses when claude_session_id was set
-        full_prompt = f"{SYSTEM_PROMPT}\n\nUser: {message}"
-
-        # Don't pass claude_session_id for now - it causes empty responses
-        options = self._get_options(claude_session_id=None)
+        # Use system_prompt option - SDK handles context properly
+        # Only pass claude_session_id if we have a valid one and it's a resume
+        options = self._get_options(
+            claude_session_id=claude_session_id if is_resume else None,
+            is_resume=is_resume
+        )
 
         content_parts = []
+        tool_uses = []
         total_cost = 0.0
         duration_ms = 0
         new_claude_session_id = None
 
         try:
             async with ClaudeSDKClient(options=options) as client:
-                # Send the query with context
-                await client.query(full_prompt)
+                # Send just the user message - system prompt is in options
+                await client.query(message)
 
                 # Receive and process response
                 async for msg in client.receive_response():
@@ -157,6 +163,15 @@ class AgentClient:
                                 yield {
                                     "type": "text",
                                     "content": block.text,
+                                    "session_id": session_id
+                                }
+                            elif isinstance(block, ToolUseBlock):
+                                # Track and yield tool usage for visibility
+                                tool_name = block.name
+                                tool_uses.append(tool_name)
+                                yield {
+                                    "type": "tool_use",
+                                    "tool": tool_name,
                                     "session_id": session_id
                                 }
 
@@ -171,7 +186,8 @@ class AgentClient:
                             "session_id": session_id,
                             "is_error": msg.is_error,
                             "cost_usd": total_cost,
-                            "duration_ms": duration_ms
+                            "duration_ms": duration_ms,
+                            "tools_used": tool_uses
                         }
 
             # Store assistant response and update session
@@ -210,6 +226,7 @@ class AgentClient:
             Dict with full response and metadata
         """
         content_parts = []
+        tools_used = []
         result_data = {}
         final_session_id = session_id
         received_any = False
@@ -219,6 +236,8 @@ class AgentClient:
             if chunk["type"] == "text":
                 content_parts.append(chunk["content"])
                 final_session_id = chunk.get("session_id") or final_session_id
+            elif chunk["type"] == "tool_use":
+                tools_used.append(chunk["tool"])
             elif chunk["type"] == "result":
                 result_data = chunk
                 final_session_id = chunk.get("session_id") or final_session_id
@@ -246,7 +265,8 @@ class AgentClient:
             "metadata": {
                 "is_error": result_data.get("is_error", False),
                 "cost_usd": result_data.get("cost_usd", 0),
-                "duration_ms": result_data.get("duration_ms", 0)
+                "duration_ms": result_data.get("duration_ms", 0),
+                "tools_used": tools_used
             }
         }
 

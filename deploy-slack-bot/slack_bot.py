@@ -99,6 +99,33 @@ def truncate_for_slack(text: str, max_length: int = 3900) -> str:
     return text[:max_length] + "\n\n_(Response truncated due to length)_"
 
 
+def format_tool_usage(tools: list[str]) -> str:
+    """Format tool usage for display."""
+    if not tools:
+        return ""
+
+    # Map tool names to friendly descriptions
+    tool_names = {
+        "Read": "Reading files",
+        "Glob": "Finding files",
+        "Grep": "Searching code",
+        "Write": "Writing files",
+        "Edit": "Editing files",
+        "WebFetch": "Fetching web content",
+        "WebSearch": "Searching the web",
+        "Skill": "Using skill",
+    }
+
+    # Get unique tools in order
+    unique_tools = []
+    for t in tools:
+        if t not in unique_tools:
+            unique_tools.append(t)
+
+    descriptions = [tool_names.get(t, t) for t in unique_tools[:5]]
+    return "_" + " → ".join(descriptions) + "_\n\n"
+
+
 def call_agent(user_id: str, message: str, username: str = None) -> str:
     """Call the marketing agent API (synchronous to avoid event loop conflicts)."""
     session_id = get_user_session(user_id)
@@ -115,14 +142,23 @@ def call_agent(user_id: str, message: str, username: str = None) -> str:
         response.raise_for_status()
         data = response.json()
 
-        logger.info(f"API response keys: {data.keys()}, content length: {len(data.get('content', ''))}")
+        # Extract metadata including tools used
+        metadata = data.get("metadata", {})
+        tools_used = metadata.get("tools_used", [])
+
+        logger.info(f"API response: content={len(data.get('content', ''))} chars, tools={tools_used}")
 
         # Save session for continuity
         if "session_id" in data:
             save_user_session(user_id, data["session_id"], username)
 
         content = data.get("content") or "Sorry, I couldn't generate a response."
-        return truncate_for_slack(content)
+
+        # Prepend tool usage summary if any tools were used
+        tool_summary = format_tool_usage(tools_used)
+        full_response = tool_summary + content
+
+        return truncate_for_slack(full_response)
 
 
 def get_username(client, user_id: str) -> str:
