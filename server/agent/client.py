@@ -238,8 +238,14 @@ class AgentClient:
         if not final_session_id:
             final_session_id = self.memory.create_session(metadata={"type": "chat", "note": "fallback"})
 
+        content = "".join(content_parts)
+
+        # If no content was generated, provide a helpful fallback
+        if not content.strip():
+            content = "I processed your request but didn't generate a text response. Could you please rephrase or try again?"
+
         return {
-            "content": "".join(content_parts),
+            "content": content,
             "session_id": final_session_id,
             "metadata": {
                 "is_error": result_data.get("is_error", False),
