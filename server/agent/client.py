@@ -90,8 +90,6 @@ class AgentClient:
             max_turns=self.max_turns,
             max_budget_usd=self.max_budget_usd,
             allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "WebFetch", "WebSearch", "Skill"],
-            # Use system_prompt option instead of prepending to every message
-            system_prompt=SYSTEM_PROMPT,
         )
 
         # Resume from previous SDK session if available and valid
@@ -136,12 +134,11 @@ class AgentClient:
         # Store user message
         self.memory.add_message(session_id, "user", message)
 
-        # Use system_prompt option - SDK handles context properly
-        # Only pass claude_session_id if we have a valid one and it's a resume
-        options = self._get_options(
-            claude_session_id=claude_session_id if is_resume else None,
-            is_resume=is_resume
-        )
+        # Prepend system prompt to message (SDK system_prompt option doesn't work as expected)
+        full_prompt = f"{SYSTEM_PROMPT}\n\nUser: {message}"
+
+        # Don't use session resume for now - it causes empty responses
+        options = self._get_options(claude_session_id=None, is_resume=False)
 
         content_parts = []
         tool_uses = []
@@ -151,8 +148,8 @@ class AgentClient:
 
         try:
             async with ClaudeSDKClient(options=options) as client:
-                # Send just the user message - system prompt is in options
-                await client.query(message)
+                # Send the full prompt with system context
+                await client.query(full_prompt)
 
                 # Receive and process response
                 async for msg in client.receive_response():
