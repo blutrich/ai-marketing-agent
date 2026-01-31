@@ -90,6 +90,13 @@ def clear_user_session(slack_user_id: str):
             logger.error(f"Failed to clear user session: {e}")
 
 
+def truncate_for_slack(text: str, max_length: int = 3900) -> str:
+    """Truncate text to fit Slack's 4000 character limit."""
+    if len(text) <= max_length:
+        return text
+    return text[:max_length] + "\n\n_(Response truncated due to length)_"
+
+
 def call_agent(user_id: str, message: str, username: str = None) -> str:
     """Call the marketing agent API (synchronous to avoid event loop conflicts)."""
     session_id = get_user_session(user_id)
@@ -110,7 +117,8 @@ def call_agent(user_id: str, message: str, username: str = None) -> str:
         if "session_id" in data:
             save_user_session(user_id, data["session_id"], username)
 
-        return data.get("content", "Sorry, I couldn't generate a response.")
+        content = data.get("content", "Sorry, I couldn't generate a response.")
+        return truncate_for_slack(content)
 
 
 def get_username(client, user_id: str) -> str:
