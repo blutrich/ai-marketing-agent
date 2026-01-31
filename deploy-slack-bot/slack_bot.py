@@ -90,16 +90,16 @@ def clear_user_session(slack_user_id: str):
             logger.error(f"Failed to clear user session: {e}")
 
 
-async def call_agent(user_id: str, message: str, username: str = None) -> str:
-    """Call the marketing agent API."""
+def call_agent(user_id: str, message: str, username: str = None) -> str:
+    """Call the marketing agent API (synchronous to avoid event loop conflicts)."""
     session_id = get_user_session(user_id)
 
     payload = {"message": message}
     if session_id:
         payload["session_id"] = session_id
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(
+    with httpx.Client(timeout=120.0) as client:
+        response = client.post(
             f"{AGENT_API_URL}/agent/chat",
             json=payload
         )
@@ -143,8 +143,7 @@ def handle_mention(event, say, client):
     say("🤔 Thinking...", thread_ts=thread_ts)
 
     try:
-        import asyncio
-        response = asyncio.run(call_agent(user_id, message, username))
+        response = call_agent(user_id, message, username)
         say(response, thread_ts=thread_ts)
     except Exception as e:
         logger.error(f"Agent error: {e}")
@@ -166,8 +165,7 @@ def handle_dm(event, say, client):
         return
 
     try:
-        import asyncio
-        response = asyncio.run(call_agent(user_id, message, username))
+        response = call_agent(user_id, message, username)
         say(response)
     except Exception as e:
         logger.error(f"Agent error: {e}")
@@ -190,8 +188,7 @@ def handle_slash_command(ack, respond, command, client):
     respond("🤔 Thinking...")
 
     try:
-        import asyncio
-        response = asyncio.run(call_agent(user_id, message, username))
+        response = call_agent(user_id, message, username)
         respond(response)
     except Exception as e:
         logger.error(f"Agent error: {e}")
